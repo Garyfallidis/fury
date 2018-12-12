@@ -3978,7 +3978,8 @@ class GridUI(UI):
     def __init__(self,
                  actors, captions=None, caption_offset=(0, -100, 0),
                  cell_padding=0,
-                 cell_shape="rect", aspect_ratio=16/9., dim=None):
+                 cell_shape="rect", aspect_ratio=16/9., dim=None,
+                 rotation_speed=1):
 
         # self.resize(size)
 
@@ -3991,6 +3992,7 @@ class GridUI(UI):
                               aspect_ratio=aspect_ratio, dim=dim)
         self._actors = []
         self._actors_dict = {}
+        self.rotation_speed = rotation_speed
 
         for item in self.container._items:
             self._actors.append(item._items[0])
