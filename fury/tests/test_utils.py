@@ -5,7 +5,7 @@ from fury.utils import (map_coordinates_3d_4d,
                         vtk_matrix_to_numpy,
                         numpy_to_vtk_matrix,
                         get_grid_cells_position,
-                        rotate, vtk)
+                        rotate, vtk, move)
 from fury import actor, window, utils
 
 
@@ -255,5 +255,41 @@ def test_rotate(interactive=False):
         npt.assert_equal(red_sum_new > red_sum, True)
 
 
+def test_move_glyph(interactive=False):
+
+    centers = np.array([[0, 0, 0],
+                        [0, -1, 0],
+                        [0, 1, 0.]])
+
+    dirs = np.array([[1, 0, 0],
+                    [1, 0, 0],
+                    [1, 0, 0.]])
+
+    colors = np.random.rand(3, 3)
+
+    arrows = actor.arrow(centers=centers, colors=colors, directions=dirs)
+
+    showm = window.ShowManager(size=(1800, 600))
+
+    mover = move(arrows)
+
+    def timer_callback(_obj, _event):
+
+        centers_update = np.array([[0.01, 0, 0],
+                                   [0.02, 0, 0],
+                                   [0.03, 0, 0.]])
+
+        mover.move(centers_update)
+
+        showm.render()
+
+
+    showm.scene.add(arrows)
+    showm.initialize()
+    showm.add_timer_callback(True, 200, timer_callback)
+
+    showm.start()
+
 if __name__ == '__main__':
-    npt.run_module_suite()
+    # npt.run_module_suite()
+    test_move_glyph()

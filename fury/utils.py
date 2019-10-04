@@ -767,3 +767,37 @@ def rotate(actor, rotation=(90, 1, 0, 0)):
         prop3D.SetPosition(newTransform.GetPosition())
         prop3D.SetScale(newTransform.GetScale())
         prop3D.SetOrientation(newTransform.GetOrientation())
+
+
+def move(actor):
+    """ Move an actor (could be a glyph of many objects)
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    mover : Mover
+        A Mover object with method "move" that takes as input
+        the centers array you want to move to.
+    """
+
+    class Mover(object):
+        nb_pts = actor.GetMapper().GetInput().GetReferenceCount()
+        pts = numpy_support.vtk_to_numpy(
+            actor.GetMapper().GetInput().GetPoints().GetData())
+
+        def move(self, centers_update):
+            """
+            Parameters
+            -------
+            """
+            centers_update = np.repeat(centers_update,
+                                       self.pts.shape[0] / self.nb_pts, axis=0)
+            self.pts += centers_update
+
+            actor.GetMapper().GetInput().SetPoints(numpy_to_vtk_points(self.pts))
+            actor.GetMapper().GetInput().ComputeBounds()
+
+    mover = Mover()
+    return mover
