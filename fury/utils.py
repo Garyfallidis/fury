@@ -801,3 +801,138 @@ def move(actor):
 
     mover = Mover()
     return mover
+
+
+from fury import window
+from fury.window import vtk
+
+@window.vtk.calldata_type(window.vtk.VTK_OBJECT)
+def vtk_shader_callback(caller, event, calldata=None):
+    program = calldata
+    global timer
+    if program is not None:
+        try:
+            pass
+            # program.SetUniformf("time", time)
+        except ValueError:
+            pass
+
+from vtk.util import numpy_support as ns
+from fury import window
+
+def move_shader(actor, my_vertices):
+    class Mover(object):
+
+        def setup(self):
+
+            mapper = actor.GetMapper()
+            mapper.AddObserver(window.vtk.vtkCommand.UpdateShaderEvent,
+                               vtk_shader_callback)
+
+            my_dummy_data = my_vertices
+            self.my_dummy_data_vtk = ns.numpy_to_vtk(my_dummy_data,
+                                                     deep=True,
+                                                     array_type=vtk.VTK_UNSIGNED_CHAR)
+            self.my_dummy_data_vtk.SetName('dummy_array')
+            mapper.GetInput().GetPointData().AddArray(
+                self.my_dummy_data_vtk)
+
+            mapper.MapDataArrayToVertexAttribute(
+                'dummyAttribute',
+                'dummy_array',
+                vtk.vtkDataObject.FIELD_ASSOCIATION_POINTS,
+                -1)
+
+            # now we augment VTK's default shaders with our own code
+            # first, declare the incoming vertex attribute
+            mapper.AddShaderReplacement(
+                vtk.vtkShader.Vertex,
+                '//VTK::PositionVC::Dec',  # target the PositionVC block
+                True,
+                '''
+                // include the default
+                //VTK::PositionVC::Dec
+                // now declare our attribute
+                in vec3 dummyAttribute;
+                ''',
+                False
+            )
+
+            # now calculate the new vertex coordinates
+            mapper.AddShaderReplacement(
+                vtk.vtkShader.Vertex,
+                '//VTK::PositionVC::Impl',  # target the PositionVC block
+                True,
+                '''
+                // replace the default
+                // copy position in model coordinates
+                vec4 myVertexMC = vertexMC;
+                // modify coordinates with dummyAttribute
+                // just for fun, 'swizzle' the parameters
+                // subtract 0.5 so it stays centered
+                myVertexMC.xyz = vertexMC.xyz + dummyAttribute.xyz;
+                // this is used for lighting in the frag shader
+                // need to calculate and include since we replaced the default
+                vertexVCVSOutput = MCVCMatrix * myVertexMC;
+                // transform from model to display coordinates
+                gl_Position = MCDCMatrix * myVertexMC;
+                ''',
+                False
+            )
+
+        def move(self, my_vertices):
+
+            my_dummy_data = my_vertices
+            self.my_dummy_data_vtk = ns.numpy_to_vtk(my_dummy_data,
+                                                     deep=True,
+                                                     array_type=vtk.VTK_UNSIGNED_CHAR)
+
+    mover = Mover()
+    mover.setup()
+
+    return mover
+
+    # mapper.AddShaderReplacement(
+    #     vtk.vtkShader.Vertex,
+    #     "//VTK::Normal::Dec",
+    #     True,
+    #     """
+    #     //VTK::Normal::Dec
+    #     out vec4 myVertexMC;
+    #     """,
+    #     False
+    # )
+
+    # mapper.AddShaderReplacement(
+    #     vtk.vtkShader.Vertex,
+    #     "//VTK::Normal::Impl",
+    #     True,
+    #     """
+    #     //VTK::Normal::Impl
+    #     myVertexMC = vertexMC;
+    #     myVertexMC = MyVertexMC + 1.0;
+    #     """,
+    #     False
+    # )
+
+    # mapper.AddShaderReplacement(
+    #     vtk.vtkShader.Fragment,
+    #     "//VTK::Normal::Dec",
+    #     True,
+    #     """
+    #     //VTK::Normal::Dec
+    #     varying vec4 myVertexMC;
+    #     uniform float time;
+    #     """,
+    #     False
+    # )
+
+    # mapper.AddShaderReplacement(
+    #     vtk.vtkShader.Fragment,
+    #     '//VTK::Light::Impl',
+    #     True,
+    #     """
+    #     //VTK::Light::Impl
+    #     """,
+    #     False
+    # )

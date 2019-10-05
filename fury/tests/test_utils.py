@@ -290,6 +290,51 @@ def test_move_glyph(interactive=False):
 
     showm.start()
 
+
+def test_move_glyph_shaders(interactive=False):
+
+    centers = np.array([[0, 0, 0],
+                        [0, -1, 0],
+                        [0, 1, 0.]])
+
+    dirs = np.array([[1, 0, 0],
+                    [1, 0, 0],
+                    [1, 0, 0.]])
+
+    colors = np.random.rand(3, 3)
+
+    arrows = actor.arrow(centers=centers, colors=colors, directions=dirs)
+
+    showm = window.ShowManager(size=(1800, 600))
+
+    mover = move(arrows)
+    centers = np.zeros((3, 3))
+    mover2 = utils.move_shader(arrows, centers)
+
+    centers_update = np.array([[0.01, 0, 0],
+                               [0.02, 0, 0],
+                               [0.03, 0, 0.]])
+
+
+    def timer_callback(_obj, _event):
+
+
+        centers_update[:, 0] += 0.1
+        print(centers_update)
+        mover2.move(centers_update)
+        #utils.move_shader(arrows, centers_update)
+
+        showm.render()
+
+
+    showm.scene.add(arrows)
+    showm.initialize()
+    showm.add_timer_callback(True, 200, timer_callback)
+
+    showm.start()
+
+
+
 if __name__ == '__main__':
     # npt.run_module_suite()
-    test_move_glyph()
+    test_move_glyph_shaders()

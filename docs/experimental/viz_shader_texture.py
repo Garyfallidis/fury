@@ -58,7 +58,7 @@ mapper.SetFragmentShaderCode(
     //VTK::Output::Dec  // always have this line in your FS
     in vec3 TexCoords;
     uniform samplerCube texture_0;
-    
+
     void main() {
         gl_FragData[0] = texture(texture_0, TexCoords);
     }
