@@ -52,7 +52,7 @@ def matplotlib_figure_to_numpy(fig, dpi=100, fname=None, flip_up_down=True,
 
 
 def set_polydata_texture_coords(polydata, tex_coords):
-    """Set polydata normals with a numpy array (ndarrays Nx3 int).
+    """Set polydata texture coordinates with a numpy array (ndarrays Nx3 int).
 
     Parameters
     ----------
@@ -61,5 +61,7 @@ def set_polydata_texture_coords(polydata, tex_coords):
     """
 
     vtk_tcoords = numpy_support.numpy_to_vtk(tex_coords, deep=True)
+    vtk_tcoords.SetNumberOfComponents(3)
+    vtk_tcoords.SetName("TextureCoordinates")
     polydata.GetPointData().SetTCoords(vtk_tcoords)
     return polydata
