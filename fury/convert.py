@@ -2,6 +2,7 @@ import numpy as np
 import os
 from fury.io import load_image
 from tempfile import TemporaryDirectory
+from vtk.util import numpy_support
 
 
 def matplotlib_figure_to_numpy(fig, dpi=100, fname=None, flip_up_down=True,
@@ -56,10 +57,9 @@ def set_polydata_texture_coords(polydata, tex_coords):
     Parameters
     ----------
     polydata : vtkPolyData
-    normals : normals, represented as 2D ndarrays (Nx3) (one per vertex)
-
+    tex_coords : tex_coords, represented as 2D ndarrays (Nx3) (one per vertex)
     """
-    from vtk.util import numpy_support
+
     vtk_tcoords = numpy_support.numpy_to_vtk(tex_coords, deep=True)
     polydata.GetPointData().SetTCoords(vtk_tcoords)
     return polydata
