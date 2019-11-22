@@ -48,3 +48,18 @@ def matplotlib_figure_to_numpy(fig, dpi=100, fname=None, flip_up_down=True,
     if flip_up_down:
         arr = np.flipud(arr)
     return arr
+
+
+def set_polydata_texture_coords(polydata, tex_coords):
+    """Set polydata normals with a numpy array (ndarrays Nx3 int).
+
+    Parameters
+    ----------
+    polydata : vtkPolyData
+    normals : normals, represented as 2D ndarrays (Nx3) (one per vertex)
+
+    """
+    from vtk.util import numpy_support
+    vtk_tcoords = numpy_support.numpy_to_vtk(tex_coords, deep=True)
+    polydata.GetPointData().SetTCoords(vtk_tcoords)
+    return polydata
