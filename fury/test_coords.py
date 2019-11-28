@@ -5,7 +5,7 @@ from fury import window, utils, actor
 from fury.convert import set_polydata_texture_coords
 
 
-def test_polydata_texture_coords(interactive=False):
+def test_polydata_texture_coords2(interactive=False):
     # Create a cube
     my_triangles = np.array([[0, 6, 4],
                              [0, 2, 6],
@@ -27,29 +27,52 @@ def test_polydata_texture_coords(interactive=False):
                             [1.0, 0.0, 1.0],
                             [1.0, 1.0, 0.0],
                             [1.0, 1.0, 1.0]])
+
     colors = my_vertices * 255
     my_polydata = vtk.vtkPolyData()
 
     utils.set_polydata_vertices(my_polydata, my_vertices)
     utils.set_polydata_triangles(my_polydata, my_triangles)
 
+
+
+def _square(scale=1):
+    polydata = vtk.vtkPolyData()
+
+    vertices = np.array([[0.0, 0.0, 0.0],
+                         [0.0, 1.0, 0.0],
+                         [1.0, 1.0, 0.0],
+                         [1.0, 0.0, 0.0]])
+
+    vertices -= np.array([0.5, 0.5, 0])
+
+    vertices = scale * vertices
+
+    triangles = np.array([[0, 1, 2], [2, 3, 0]], dtype='i8')
+
+    utils.set_polydata_vertices(polydata, vertices)
+    utils.set_polydata_triangles(polydata, triangles)
+    return polydata
+
+
+def test_polydata_texture_coords(interactive=False):
     # utils.set_polydata_colors(my_polydata, colors)
     # utils.update_polydata_normals(my_polydata)
     # normals = utils.get_polydata_normals(my_polydata)
     # npt.assert_equal(len(normals), len(my_vertices))
 
-    rgb = (55 * np.ones((40, 40, 3))).astype('uint8')
+    https://vtk.org/Wiki/VTK/Examples/Cxx/Visualization/TextureMapQuad
+
+    my_polydata = _square()
+
+    rgb = (255 * np.ones((40, 40, 3))).astype('uint8')
     rgb[:, :, 0] = 0
     tex_actor = actor.texture(rgb)
 
-    tcoords = np.array([[0.5, 1., 0.],
-                        [1.5, 2., 0.],
-                        [0.5, 1., 0.],
-                        [1.5, 2., 0.],
-                        [0.5, 1., 0.],
-                        [1.5, 2., 0.],
-                        [0.5, 1., 0.],
-                        [0.5, 1., 0.]], dtype='f4')
+    tcoords = np.array([[0., 0., 0.],
+                        [1., 0., 0.],
+                        [1., 1., 0.],
+                        [0., 2., 0.]], dtype='f4')
 
     print(tcoords.shape)
     print(tcoords.dtype)
@@ -65,7 +88,11 @@ def test_polydata_texture_coords(interactive=False):
     # target_texture.UseSRGBColorSpaceOn()
     # target_texture.MipmapOn()
     pd_actor.SetTexture(target_texture)
+
+    pd_actor.GetMapper().SetInputData(my_polydata)
     pd_actor.GetMapper().Update()
+    pd_actor.GetProperty().BackfaceCullingOff()
+    # pd_actor.GetProperty().FrontfaceCullingOn()
     print(target_texture)
 
     scene = window.Scene()
