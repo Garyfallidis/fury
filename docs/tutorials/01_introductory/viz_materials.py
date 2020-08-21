@@ -36,10 +36,10 @@ label_actor = actor.label(text='Test')
 directions = np.array([[np.sqrt(2)/2, 0, np.sqrt(2)/2],
                        [np.sqrt(2)/2, np.sqrt(2)/2, 0],
                        [0, np.sqrt(2)/2, np.sqrt(2)/2]])
-fury_actor = actor.cube(centers, directions, colors, scale=scales)
+fury_actor = actor.cube(centers, directions, colors, scales=scales)
 
 floor_actor = actor.box(centers=np.array([[0, -20., 0]]), directions=(0, 1, 0),
-                        colors=(0.2, 0.2, 0.2), scale=(1000, 2, 1000))
+                        colors=(0.9, 0.9, 0.9), scales=(500, 20, 500))
 
 ap = fury_actor.GetProperty()
 
@@ -84,7 +84,10 @@ scene.add(fury_actor)
 scene.add(floor_actor)
 scene.add(label_actor)
 scene.add(ax)
-scene.reset_camera()
+
+scene.set_camera(position=(0, 50, 0.))
+
+# scene.reset_camera()
 
 ###############################################################################
 # Create the Picking manager
@@ -154,18 +157,20 @@ fury_actor.AddObserver('LeftButtonPressEvent', left_click_callback, 1)
 
 import vtk
 
-light1 = vtk.vtkLight()
-light1.SetFocalPoint(0, 0, 0)
-light1.SetPosition(0, 10., 2)
-light1.SetColor(1, 1, 1.)
-light1.SetIntensity(0.4)
-scene.AddLight(light1)
+# light1 = vtk.vtkLight()
+# light1.SetFocalPoint(0, 0, 0)
+# light1.SetPosition(0, 100., 2)
+# light1.SetColor(1, 1, 1.)
+# light1.SetIntensity(0.4)
+# scene.AddLight(light1)
+
+scene.add(actor.point(np.array([[0.0, 50.0, 0.0]]), colors=(1, 0.5, 0), point_radius=5.))
 
 light2 = vtk.vtkLight()
 light2.SetFocalPoint(0, 0, 0)
-light2.SetPosition(10.0, 10.0, 10.0)
+light2.SetPosition(0.0, 50.0, 0.0)
 light2.SetColor(1, 1, 1.)
-light2.SetIntensity(0.8)
+light2.SetIntensity(1.)
 scene.AddLight(light2)
 
 shadows = vtk.vtkShadowMapPass()
@@ -184,8 +189,12 @@ cameraP.SetDelegatePass(seq)
 glrenderer = scene
 glrenderer.SetPass(cameraP)
 
+
+
 ###############################################################################
 # Make the window appear
+
+
 
 showm = window.ShowManager(scene, size=(1024, 768),
                            order_transparent=True,
