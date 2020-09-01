@@ -38,8 +38,8 @@ directions = np.array([[np.sqrt(2)/2, 0, np.sqrt(2)/2],
                        [0, np.sqrt(2)/2, np.sqrt(2)/2]])
 fury_actor = actor.cube(centers, directions, colors, scales=scales)
 
-floor_actor = actor.box(centers=np.array([[0, -20., 0]]), directions=(0, 1, 0),
-                        colors=(0.9, 0.9, 0.9), scales=(500, 20, 500))
+floor_actor = actor.box(centers=np.array([[0, -40., 0]]), directions=(0, 1, 0),
+                        colors=(0.9, 0.9, 0.9), scales=(1000, 20, 1000))
 
 ap = fury_actor.GetProperty()
 
