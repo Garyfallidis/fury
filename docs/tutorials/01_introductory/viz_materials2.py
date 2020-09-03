@@ -95,6 +95,12 @@ def main():
     light1.SetPosition(0, 1, 0.2)
     light1.SetColor(colors.GetColor3d('HighNoonSun'))
     light1.SetIntensity(0.3)
+    light1.SetShadowAttenuation(0.8)
+    print('Attenuation ', light1.GetShadowAttenuation())
+    #light1.SetLightTypeToHeadlight()
+    light1.SetLightTypeToSceneLight()
+    #light1.SetLightTypeToCameraLight()
+
     renderer.AddLight(light1)
 
     light2 = vtk.vtkLight()
@@ -102,6 +108,7 @@ def main():
     light2.SetPosition(1.0, 1.0, 1.0)
     light2.SetColor(colors.GetColor3d('100W Tungsten'))
     light2.SetIntensity(0.8)
+    light2.SetShadowAttenuation(0.8)
     renderer.AddLight(light2)
 
     mapper = vtk.vtkPolyDataMapper()
