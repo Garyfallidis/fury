@@ -8,7 +8,7 @@ import numpy.testing as npt
 from scipy.ndimage.measurements import center_of_mass
 
 from fury import shaders
-from fury import actor, window
+from fury import actor, window, light, material
 from fury.actor import grid
 from fury.decorators import skip_osx, skip_win
 from fury.utils import shallow_copy, rotate
@@ -1345,3 +1345,40 @@ def test_sdf_actor(interactive=False):
     arr = window.snapshot(scene)
     report = window.analyze_snapshot(arr, colors=colors)
     npt.assert_equal(report.objects, 3)
+
+
+def test_actor_materials():
+
+    scene = window.Scene()
+    box = actor.box(centers=np.array([[0, -40., 0], [0, 10, 0.]]),
+                    directions=(0, 1, 0),
+                    colors=(1., 0., 0.),
+                    scales=np.array([[2000, 40., 2000], [40, 40, 40.]]))
+
+    bp = material.standard(
+            box,
+            ambient_level=0.5,
+            diffuse_level=0.9,
+            specular_level=0.9,
+            specular_power=0.5,
+            opacity=.5)
+    print(bp)
+
+    spot = light.light(
+            focal_point=(0, 0, 0.), position=(0, 500, 0.),
+            color=(255, 255, 255), intensity=0.8,
+            attenuation=0.2)
+    scene.AddLight(spot)
+    scene.add(actor.axes(scale=(100, 100, 100)))
+    print(spot)
+
+    from fury import utils
+    utils.update_actor(box)
+
+    scene.add(box)
+    window.show(scene)
+
+
+if __name__ == '__main__':
+
+    test_actor_materials()
