@@ -1350,7 +1350,7 @@ def test_sdf_actor(interactive=False):
 def test_actor_materials():
 
     scene = window.Scene()
-    box = actor.box(centers=np.array([[0, -40., 0], [0, 10, 0.]]),
+    box = actor.box(centers=np.array([[0, -40., 0], [0, 20, 0.]]),
                     directions=(0, 1, 0),
                     colors=(1., 0., 0.),
                     scales=np.array([[2000, 40., 2000], [40, 40, 40.]]))
@@ -1358,26 +1358,70 @@ def test_actor_materials():
     bp = material.standard(
             box,
             ambient_level=0.5,
-            diffuse_level=0.9,
-            specular_level=0.9,
-            specular_power=0.5,
-            opacity=.5)
-    print(bp)
+            diffuse_level=0.5,
+            specular_level=0.1,
+            specular_power=1,
+            opacity=1.)
+    # print(bp)
+
 
     spot = light.light(
             focal_point=(0, 0, 0.), position=(0, 500, 0.),
-            color=(255, 255, 255), intensity=0.8,
-            attenuation=0.2)
+            color=(150, 150, 150), intensity=0.8,
+            attenuation=0.9)
     scene.AddLight(spot)
     scene.add(actor.axes(scale=(100, 100, 100)))
-    print(spot)
+    scene.add(actor.point((0, 400, 0), colors=(1, 0, 0), point_radius=10.))
+    # print(spot)
 
+    import vtk
     from fury import utils
     utils.update_actor(box)
 
     scene.add(box)
-    window.show(scene)
 
+    source = vtk.vtkSphereSource()
+    source.SetThetaResolution(100)
+    source.SetPhiResolution(100)
+    source.Update()
+    polyData = source.GetOutput()
+    mapper = vtk.vtkPolyDataMapper()
+    mapper.SetInputData(polyData)
+
+    sphactor = vtk.vtkActor()
+    sphactor.SetMapper(mapper)
+    sphactor.SetPosition(100, 100, 0.)
+    sphactor.SetScale(50, 50, 50)
+
+    scene.add(sphactor)
+
+    scene.ResetCamera()
+
+    scene.ResetCameraClippingRange()
+
+    showm = window.ShowManager(scene, size=(2000, 1000))
+
+    showm.window.SetMultiSamples(0)
+    shadows = vtk.vtkShadowMapPass()
+    seq = vtk.vtkSequencePass()
+
+    passes = vtk.vtkRenderPassCollection()
+    passes.AddItem(shadows.GetShadowMapBakerPass())
+    passes.AddItem(shadows)
+    seq.SetPasses(passes)
+
+    cameraP = vtk.vtkCameraPass()
+    cameraP.SetDelegatePass(seq)
+
+    # Tell the renderer to use our render pass pipeline
+    #glrenderer = scene
+    #glrenderer.SetPass(cameraP)
+    # scene.SetPass(cameraP)
+    scene.SetPass(cameraP)
+
+
+    showm.initialize()
+    showm.start()
 
 if __name__ == '__main__':
 

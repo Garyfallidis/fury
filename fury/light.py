@@ -8,7 +8,7 @@ def light(focal_point=(0, 0, 0.), position=(10, 10, 0.),
     light.SetFocalPoint(focal_point)
     light.SetPosition(position)
     light.SetColor(color)
-    light.SetAmbientColor(255, 0, 0)
+    #light.SetAmbientColor(255, 0, 0)
     light.SetIntensity(intensity)
     light.SetShadowAttenuation(attenuation)
     light.SetLightTypeToSceneLight()
