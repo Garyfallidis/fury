@@ -254,7 +254,7 @@ scene.add(selected_actor)
 # more time.
 
 showm = window.ShowManager(scene, reset_camera=False, size=(
-    2080, 1500), order_transparent=False, multi_samples=2,)
+    1040, 1000), order_transparent=False, multi_samples=2,)
 
 
 showm.initialize()
@@ -262,7 +262,7 @@ scene.set_camera(position=(0, 0, -750))
 
 timer_callback = new_layout_timer(
     showm, edges, vertices_count,
-    max_iterations=500,
+    max_iterations=5000,
     vertex_initial_positions=positions)
 
 
