@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import time
 import gzip
 from tempfile import TemporaryDirectory as InTemporaryDirectory
 from warnings import warn
@@ -21,6 +21,7 @@ try:
     basestring
 except NameError:
     basestring = str
+import queue
 
 
 class Scene(Renderer):
@@ -363,6 +364,9 @@ class ShowManager(object):
         self.iren.SetInteractorStyle(self.style)
         self.iren.SetRenderWindow(self.window)
 
+        self.queue_of_calls = queue.Queue()
+
+
     def initialize(self):
         """Initialize interaction."""
         self.iren.Initialize()
@@ -374,13 +378,18 @@ class ShowManager(object):
     def start(self):
         """Start interaction."""
         try:
+            print('Normal operation')
             self.render()
+            print('After render')
             if self.title.upper() == "FURY":
+                print('Title 1')
                 self.window.SetWindowName(self.title + " " + fury_version)
             else:
+                print('Title 2')
                 self.window.SetWindowName(self.title)
             self.iren.Start()
         except AttributeError:
+            print('In Exception')
             self.__init__(self.scene, self.title, size=self.size,
                           png_magnify=self.png_magnify,
                           reset_camera=self.reset_camera,
@@ -394,11 +403,43 @@ class ShowManager(object):
                 self.window.SetWindowName(self.title)
             self.iren.Start()
 
-        self.window.RemoveRenderer(self.scene)
-        self.scene.SetRenderWindow(None)
-        self.window.Finalize()
-        del self.iren
-        del self.window
+        print('Are we ever getting here?')
+        # self.window.RemoveRenderer(self.scene)
+        # print('Are we ever getting here 2?')
+        # self.scene.SetRenderWindow(None)
+        # print('Are we ever getting here 3?')
+        # self.window.Finalize()
+        # print('Are we ever getting here 4?')
+        # del self.iren
+        # print('Are we ever getting here 5?')
+        # del self.window
+        # print('Are we ever getting here 6?')
+        # import gc
+        # gc.collect()
+
+        # self.exit()
+
+    def start2(self):
+        
+        while self.iren.GetDone() is False:
+            start = time.perf_counter()
+            self.iren.ProcessEvents()
+            if(not self.iren.GetDone()):
+                try:
+                    func = self.queue_of_calls.get(False)
+                    func()
+                except queue.Empty:
+                    pass
+                else:
+                    pass
+                self.render()
+
+            end = time.perf_counter()
+            # throttle to 100fps to avoid busy wait
+            timePerFrame = 0.01
+            if end - start < timePerFrame:
+                time.sleep(timePerFrame - (end - start))
+            
 
     def record_events(self):
         """Record events during the interaction.
@@ -561,7 +602,7 @@ class ShowManager(object):
         self.iren.TerminateApp()
         self.destroy_timers()
         self.timers.clear()
-        
+        del self.window
 
 
 def show(scene, title='FURY', size=(300, 300), png_magnify=1,

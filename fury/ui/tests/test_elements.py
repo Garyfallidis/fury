@@ -1,4 +1,6 @@
 """Test for components module."""
+import time
+import threading
 from os.path import join as pjoin
 import os
 import itertools
@@ -77,6 +79,10 @@ def test_ui_line_slider_2d_horizontal_bottom(recording=False):
         show_manager.play_events_from_file(recording_filename)
         expected = EventCounter.load(expected_events_counts_filename)
         event_counter.check_counts(expected)
+        # del show_manager.iren
+        # del show_manager
+        # import gc
+        # gc.collect()
 
 
 def test_ui_line_slider_2d_horizontal_top(recording=False):
@@ -896,8 +902,10 @@ def test_timer():
     xyzr2 = np.array([[0, 200, 0, 30], [100, 200, 0, 50], [300, 200, 0, 100]])
     colors = np.array([[1, 0, 0, 0.3], [0, 1, 0, 0.4], [0, 0, 1., 0.45]])
 
+    print("Step 1")
     scene = window.Scene()
 
+    print("Step 2")
     sphere_actor = actor.sphere(centers=xyzr[:, :3], colors=colors[:],
                                 radii=xyzr[:, 3])
 
@@ -906,29 +914,95 @@ def test_timer():
     sphere_actor2 = actor.sphere(centers=xyzr2[:, :3], colors=colors[:],
                                  radii=xyzr2[:, 3], vertices=vertices,
                                  faces=faces.astype('i8'))
-
+    print("Step 3")
     scene.add(sphere_actor)
     scene.add(sphere_actor2)
-
+    
+    print("Step 4")
     tb = ui.TextBlock2D()
+    print("Step 5")
     counter = itertools.count()
+    print("Step 6")
     showm = window.ShowManager(scene,
-                               size=(1024, 768), reset_camera=False,
-                               order_transparent=True)
-
+                               size=(1024, 768), reset_camera=False,                               
+                               order_transparent=True,
+                               interactor_style='trackball')
+    print("Step 7")
     showm.initialize()
-    scene.add(tb)
+
+    print("Step 8")
+    # scene.add(tb)
+    showm.render()
 
     def timer_callback(_obj, _event):
         cnt = next(counter)
         tb.message = "Let's count to 10 and exit :" + str(cnt)
+        print(cnt)
         showm.render()
         if cnt > 9:
             showm.exit()
 
-    # Run every 200 milliseconds
-    showm.add_timer_callback(True, 200, timer_callback)
-    showm.start()
+    print("Step 9")
 
-    arr = window.snapshot(scene, offscreen=True)
-    npt.assert_(np.sum(arr) > 0)
+    # Run every 200 milliseconds
+    # showm.add_timer_callback(True, 200, timer_callback)
+
+
+    print("Step 10")
+    # showm.start2()
+    # showm.iren.Start()
+    print("Step 11")
+    # arr = window.snapshot(scene, offscreen=True)
+    print("Step 12")
+    # npt.assert_(np.sum(arr) > 0)
+    print("Step 13")
+
+    # def timer_callback2():
+    #     rotValue = 0
+    #     for i in range(100):
+    #         rotValue+=1
+    #         showm.queue_of_calls.put(lambda : vtkobj.rotate(rotValue))
+    #         time.sleep(.1)
+    #     #queue_of_functions.put(_FINISH_SEAMPHORE)
+      
+    cnt = 0
+
+    def timer_callback2():
+        cnt = next(counter)
+        tb.message = "New - Let's count to 10 and exit :" + str(cnt)
+        print(cnt)
+        # showm.render()
+        time.sleep(100)
+        if cnt > 90:
+            showm.exit()
+
+
+    t = time.time()
+
+    showm.queue_of_calls.put(timer_callback2)
+
+    thread_a = threading.Thread(target=showm.start2, args=())
+    thread_b = threading.Thread(target=timer_callback2, args=())
+
+    thread_a.start()
+    thread_b.start()
+
+    # doing other stuff here non blocking
+    for i in range(10):
+        print(f'doing {i}')
+        time.sleep(.1)
+    thread_a.join()
+    thread_b.join()
+
+
+if __name__ == '__main__':
+
+    for i in range(2):
+        print('------------------')
+        print('Run', i)
+        # THIS IS CRASHING HERE - Segfault here.
+        # test_ui_line_slider_2d_horizontal_bottom()
+        test_timer()
+
+        print('------------------')
+        print()
