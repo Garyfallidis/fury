@@ -20,6 +20,7 @@ SHADERS_BLOCK = {
     "prim_id": "//VTK::PrimID",   # Apple Bug
     "valuepass": "//VTK::ValuePass",  # Value raster
     "output": "//VTK::Output",  # only for geometry shader
+    "coincident":"//VTK::Coincident", # to be defined
 }
 
 # See [1] for a more extensive list of OpenGL constants
