@@ -90,6 +90,8 @@ jobs:
       uses: actions/setup-python@v7
       with:
         python-version: ${{ matrix.python-version }}
+    - name: Set up stable Rust
+      uses: dtolnay/rust-toolchain@stable
     - name: Set PYGFX_DEFAULT_PPAA
       if: startsWith(matrix.os, 'windows')
       run: |
@@ -115,6 +117,12 @@ jobs:
       run: ci/install_dependencies.sh
     - name: Install FURY
       run: ci/install.sh
+    - name: Verify native physics GPU runtime
+      run: |
+        source ci/activate_env.sh
+        set -ex
+        python -c "import fury._physics_native"
+        python docs/examples/physics_01_runtime.py --headless --verify
     - name: Run the tests!
       run: |
         if [ "${{ matrix.use-pre }}" == "true" ]; then

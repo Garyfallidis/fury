@@ -7,6 +7,7 @@ AGENTS.md
 
 # C extensions
 *.so
+fury/_physics_native*
 
 # Distribution / packaging
 .Python

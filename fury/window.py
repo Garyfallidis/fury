@@ -804,6 +804,8 @@ class ShowManager:
         self.screens = self._create_screens()
         self._callbacks = {}
         self._animations = []
+        self._simulations = {}
+        self.window.add_event_handler(self._close_simulations, "close")
 
         self._stats = None
         self._stats_initialized = False
@@ -1123,6 +1125,56 @@ class ShowManager:
         """
         if name in self._callbacks:
             del self._callbacks[name]
+
+    def add_simulation(self, world, *, update_rate=1 / 60, max_steps_per_update=8):
+        """
+        Attach one fixed-step physics clock, independent of viewport count.
+
+        Repeated registration with this manager returns the existing driver.
+        A world cannot be driven by two managers. Each update explicitly
+        downloads batched display snapshots after GPU simulation completes.
+
+        Parameters
+        ----------
+        world : fury.physics.World
+            The GPU simulation world to drive.
+        update_rate : float, optional
+            Callback interval in seconds, separate from the world's fixed dt.
+        max_steps_per_update : int, optional
+            Maximum catch-up steps per callback. Outstanding time is retained.
+
+        Returns
+        -------
+        fury.physics.SimulationDriver
+            Playback, pause, single-step, and deterministic update controls.
+        """
+        from fury.physics._simulation import SimulationDriver
+        from fury.physics._world import World
+
+        if not isinstance(world, World):
+            raise TypeError("world must be a physics.World")
+        world._ensure_open()
+        if world in self._simulations:
+            return self._simulations[world]
+        if world._driver is not None:
+            raise ValueError("world is already attached to another ShowManager")
+        return SimulationDriver(
+            world,
+            self,
+            update_rate=update_rate,
+            max_steps_per_update=max_steps_per_update,
+        )
+
+    def remove_simulation(self, world):
+        """Detach a world's simulation callback without closing its GPU state."""
+        driver = self._simulations.get(world)
+        if driver is not None:
+            driver.close()
+
+    def _close_simulations(self, event=None):
+        """Release simulation clocks when either manager or canvas closes."""
+        for driver in tuple(self._simulations.values()):
+            driver.close()
 
     def resize_callback(self, func):
         """
@@ -1986,6 +2038,7 @@ class ShowManager:
         """
         Close the rendering window and terminate the application if necessary.
         """
+        self._close_simulations()
         self.window.close()
 
 

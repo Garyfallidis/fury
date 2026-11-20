@@ -29,6 +29,7 @@ Home Page
 
    reference/index
    symlink/contributing.rst
+   Physics API <physics_api_design>
    release-history
 
 .. toctree::

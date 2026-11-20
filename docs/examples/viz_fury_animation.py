@@ -78,7 +78,7 @@ timeline.add_animation(text_anim)
 # Creating and animating 50 spheres
 # =================================
 
-for _ in range(50):
+for _ in range(5000):
     ###########################################################################
     # Create a sphere actor centered at the origin with random color and radius.
     sphere_actor = fury.actor.sphere(

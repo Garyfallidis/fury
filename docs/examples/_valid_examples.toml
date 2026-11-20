@@ -81,3 +81,38 @@ files = [
     "viz_fury_animation.py",
     # "viz_interpolators.py",
 ]
+
+[physics]
+readme = """
+GPU physics milestones
+======================
+
+Numbered examples with explicit verification: headless solver milestones and
+interactive rigid-body rendering with measured batched display transfers.
+The native runtime diagnostic is not a physics solver.
+"""
+position = 11
+enable = true
+files = [
+    "_physics_common.py",
+    "_physics_timing.py",
+    "physics_01_runtime.py",
+    "physics_02_state.py",
+    "physics_03_dynamics.py",
+    "physics_04_spatial.py",
+    "physics_05_contacts.py",
+    "physics_06_joints.py",
+    "physics_07_kinematics.py",
+    "physics_08_robot_queries.py",
+    "physics_09_robot_control.py",
+    "physics_10_particles.py",
+    "physics_11_scientific.py",
+    "physics_12_soft_body.py",
+    "physics_13_fem.py",
+    "physics_14_fluid.py",
+    "physics_15_dfsph.py",
+    "physics_16_follow.py",
+    "physics_17_contracts.py",
+    "physics_18_many_objects.py",
+    "physics_19_interactive.py",
+]
